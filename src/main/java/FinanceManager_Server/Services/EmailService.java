@@ -1,6 +1,5 @@
 package FinanceManager_Server.Services;
 
-import FinanceManager_Server.PropertiesDataManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;

@@ -2,7 +2,7 @@ package FinanceManager_Server;
 
 
 import FinanceManager_Server.Services.EmailService;
-import io.jsonwebtoken.impl.TextCodec;
+import FinanceManager_Server.Services.PropertiesDataManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;

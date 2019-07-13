@@ -10,11 +10,20 @@ import java.util.Objects;
 import java.util.Set;
 
 
-
 @Entity
+@Table(name = "budget_action")
 @IdClass(BudgetPK.class)
-public class Budget extends Action implements Serializable {
-    private static final long serialVersionUID = -5300057576001284517L;
+public class BudgetAction extends Action implements Serializable {
+
+    private static final long serialVersionUID = 574580749152845095L;
+    @Column(name = "is_create")
+    private boolean isCreate;
+
+    @Column(name = "commit_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date commitDate;
+
+
     @Id
     @Column(name = "budget_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,8 +50,6 @@ public class Budget extends Action implements Serializable {
     private Date end;
 
 
-
-
     @Column(name = "notifyLevel")
     private Float notifyLevel;
 
@@ -57,47 +64,31 @@ public class Budget extends Action implements Serializable {
     })
     private Set<Category> categories = new HashSet<>();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "commit_date")
-    private Date commitDate;
-
-
-
-    public Budget() {
-    }
-
-
-    public Budget(Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Date commitDate, Set<Category> categories) {
+    public BudgetAction(boolean isCreate, Date commitDate, Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Set<Category> categories) {
+        this.isCreate = isCreate;
+        this.commitDate = commitDate;
         this.user_id = user_id;
         this.name = name;
         this.amount = amount;
         this.start = start;
         this.end = end;
         this.notifyLevel = notifyLevel;
+        this.categories = new HashSet<>(categories);
+    }
+
+    public BudgetAction() {
+    }
+
+    public BudgetAction(boolean isCreate, Date commitDate, Budget budget) {
+        this.isCreate = isCreate;
         this.commitDate = commitDate;
-        this.categories = categories;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Budget budget = (Budget) o;
-        return Objects.equals(budget_id, budget.budget_id) &&
-                Objects.equals(user_id, budget.user_id) &&
-                Objects.equals(name, budget.name) &&
-                Objects.equals(amount, budget.amount) &&
-                Objects.equals(start, budget.start) &&
-                Objects.equals(end, budget.end) &&
-                Objects.equals(notifyLevel, budget.notifyLevel) &&
-                Objects.equals(commitDate, budget.commitDate) &&
-                Objects.equals(categories, budget.categories);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(budget_id, user_id, name, amount, start, end, notifyLevel, commitDate, categories);
+        this.user_id = budget.getUser_id();
+        this.name = budget.getName();
+        this.amount = budget.getAmount();
+        this.start = budget.getStart();
+        this.end = budget.getEnd();
+        this.notifyLevel = budget.getNotifyLevel();
+        this.categories = new HashSet<>(budget.getCategories());
     }
 
     @Override
@@ -107,13 +98,46 @@ public class Budget extends Action implements Serializable {
 
     @Override
     public boolean isCreate() {
-        return true;
+        return isCreate;
     }
 
     @Override
     public void setCreate(boolean create) {
-
+        isCreate = create;
     }
+
+    @Override
+    public Date getCommitDate() {
+        return commitDate;
+    }
+
+    @Override
+    public void setCommitDate(Date commitDate) {
+        this.commitDate = commitDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BudgetAction that = (BudgetAction) o;
+        return isCreate == that.isCreate &&
+                Objects.equals(commitDate, that.commitDate) &&
+                Objects.equals(budget_id, that.budget_id) &&
+                Objects.equals(user_id, that.user_id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(start, that.start) &&
+                Objects.equals(end, that.end) &&
+                Objects.equals(notifyLevel, that.notifyLevel) &&
+                Objects.equals(categories, that.categories);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isCreate, commitDate, budget_id, user_id, name, amount, start, end, notifyLevel, categories);
+    }
+
 
     public Long getBudget_id() {
         return budget_id;
@@ -129,14 +153,6 @@ public class Budget extends Action implements Serializable {
 
     public void setUser_id(Long user_id) {
         this.user_id = user_id;
-    }
-
-    public Set<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(Set<Category> categories) {
-        this.categories = categories;
     }
 
     public String getName() {
@@ -179,11 +195,11 @@ public class Budget extends Action implements Serializable {
         this.notifyLevel = notifyLevel;
     }
 
-    public Date getCommitDate() {
-        return commitDate;
+    public Set<Category> getCategories() {
+        return categories;
     }
 
-    public void setCommitDate(Date commitDate) {
-        this.commitDate = commitDate;
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 }

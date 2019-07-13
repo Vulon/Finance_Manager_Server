@@ -1,12 +1,10 @@
 package FinanceManager_Server.Services;
 
 
-import FinanceManager_Server.Database.BudgetRepository;
-import FinanceManager_Server.Database.CategoryRepository;
-import FinanceManager_Server.Database.Entity.User;
-import FinanceManager_Server.Database.TransactionRepository;
-import FinanceManager_Server.Database.UserRepository;
-import FinanceManager_Server.PropertiesDataManager;
+import FinanceManager_Server.Database.Repositories.BudgetRepository;
+import FinanceManager_Server.Database.Repositories.CategoryRepository;
+import FinanceManager_Server.Database.Repositories.TransactionRepository;
+import FinanceManager_Server.Database.Repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class AuthService {
@@ -33,10 +30,10 @@ public class AuthService {
         this.budgetRepository = budgetRepository;
     }
 
-    public String createAccessToken(Long userId){
+    public String createAccessToken(Long userId, Date now){
         String jwt = Jwts.builder().setIssuer("Finance Manager Server")
                 .setSubject(userId.toString())
-                .setIssuedAt(Date.from(Instant.now()))
+                .setIssuedAt(now)
                 .setExpiration(Date.from(Instant.now().plusSeconds(60 * 30)))
                 .claim("type", "access")
                 .signWith(SignatureAlgorithm.HS256, propertiesDataManager.getEncodedSecretKey())
@@ -44,10 +41,10 @@ public class AuthService {
         return jwt;
     }
 
-    public String createRefreshToken(Long userId){
+    public String createRefreshToken(Long userId, Date now){
         String jwt = Jwts.builder().setIssuer("Finance Manager Server")
                 .setSubject(userId.toString())
-                .setIssuedAt(Date.from(Instant.now()))
+                .setIssuedAt(now)
                 .setExpiration(Date.from(Instant.now().plusSeconds(60 * 60 * 24 * 20)))
                 .claim("type", "refresh")
                 .signWith(SignatureAlgorithm.HS256, propertiesDataManager.getEncodedSecretKey())
@@ -81,25 +78,18 @@ public class AuthService {
 
     }
 
-    public User getUserByToken(String access_token) throws InvalidTokenException, UserNotFoundException{
-        if (checkIsExpired(access_token)){
-            throw new TokenExpiredException();
-        }
-        Claims claims = getClaims(access_token);
-        if (!claims.get("type", String.class).equals("access")){
-            throw new InvalidTokenException("Unsupported token type");
-        }
-        User user = userRepository.getById(Long.parseLong(claims.getSubject()));
-        if (user == null){
-            throw new UserNotFoundException();
-        }
-        return user;
+    public boolean tokenHasErrors(String token, boolean isAccessToken){
+        Claims claims = getClaims(token);
+        String subject = claims.getSubject();
+        if(subject == null || Long.parseLong(subject) < 0)
+           return true;
+        Date date = claims.getExpiration();
+        if(date.getTime() < Date.from(Instant.now()).getTime())
+            return true;
+        String type = claims.get("type", String.class);
+        return !(isAccessToken && type.equals("access") || (!isAccessToken && type.equals("refresh")));
     }
 
-    public boolean checkUserInDatabase(String email){
-        User user = userRepository.findByEmail(email);
-        return user == null;
-    }
 
 
     public class TokenExpiredException extends RuntimeException{

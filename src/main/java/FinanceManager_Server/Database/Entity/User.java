@@ -1,9 +1,9 @@
 package FinanceManager_Server.Database.Entity;
 
 
+import FinanceManager_Server.TransportableDataObjects.TokenData;
+
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -48,29 +48,10 @@ public class User {
         this.refresh_token = refresh_token;
     }
 
-    @OneToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "user_transaction",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "transaction_id")}
-    )
-    private Set<Transaction> transactions;
-
-    @OneToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "user_category",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "category_id")}
-    )
-    private Set<Category> categories;
-
-    @OneToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "user_budget",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "budget_id")}
-    )
-    private Set<Budget> budgets;
+    public void setTokenData(TokenData tokenData){
+        access_token = tokenData.getAccess_token();
+        refresh_token = tokenData.getRefresh_token();
+    }
 
 
     public User(String email, String password, String lang, Boolean verified, String access_token, String refresh_token) {
@@ -86,19 +67,6 @@ public class User {
     }
 
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", lang='" + lang + '\'' +
-                ", verified=" + verified +
-                ", transactions=" + transactions +
-                ", categories=" + categories +
-                ", budgets=" + budgets +
-                '}';
-    }
 
     public Long getId() {
         return id;
@@ -132,29 +100,6 @@ public class User {
         this.lang = lang;
     }
 
-    public Set<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(Set<Transaction> transactions) {
-        this.transactions = new HashSet<>(transactions);
-    }
-
-    public Set<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(Set<Category> categories) {
-        this.categories = new HashSet<>(categories);
-    }
-
-    public Set<Budget> getBudgets() {
-        return budgets;
-    }
-
-    public void setBudgets(Set<Budget> budgets) {
-        this.budgets = new HashSet<>(budgets);
-    }
 
     public Boolean getVerified() {
         return verified;

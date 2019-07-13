@@ -1,13 +1,14 @@
-package FinanceManager_Server;
+package FinanceManager_Server.Services;
 
 import FinanceManager_Server.Application;
 import io.jsonwebtoken.impl.TextCodec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 
-@Component
+@Service
 public class PropertiesDataManager implements Serializable {
 
     private static final long serialVersionUID = 8571137094210487341L;

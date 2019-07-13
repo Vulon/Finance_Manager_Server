@@ -8,12 +8,19 @@ import java.util.Date;
 import java.util.Objects;
 
 
-
 @Entity
-@Table(name = "transaction")
+@Table(name = "transaction_action")
 @IdClass(TransactionPK.class)
-public class Transaction extends Action implements Serializable {
-    private static final long serialVersionUID = -5744874026510540290L;
+public class TransactionAction extends Action implements Serializable {
+
+    private static final long serialVersionUID = 8921236138362380586L;
+    @Column(name = "is_create")
+    private boolean isCreate;
+
+    @Column(name = "commit_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date commitDate;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "transaction_id")
@@ -34,42 +41,50 @@ public class Transaction extends Action implements Serializable {
     @Column(name = "note")
     private String note;
 
-    @OneToOne
-    private Category category;
+    @Column(name = "category_id")
+    private Long category_id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "commit_date")
-    private Date commitDate;
-
-    public Transaction(Long user_id, Double amount, Date date, String note, Category category, Date commitDate) {
+    public TransactionAction(boolean isCreate, Date commitDate, Long user_id, Double amount, Date date, String note, Long category_id) {
+        this.isCreate = isCreate;
+        this.commitDate = commitDate;
         this.user_id = user_id;
         this.amount = amount;
         this.date = date;
         this.note = note;
-        this.category = category;
-        this.commitDate = commitDate;
+        this.category_id = category_id;
     }
 
-    public Transaction() {
+    public TransactionAction(boolean isCreate, Date commitDate, Transaction transaction) {
+        this.isCreate = isCreate;
+        this.commitDate = commitDate;
+        this.user_id = transaction.getUser_id();
+        this.amount = transaction.getAmount();
+        this.date = transaction.getDate();
+        this.note = transaction.getNote();
+        this.category_id = transaction.getCategory().getCategory_id();
+    }
+
+    public TransactionAction() {
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Transaction that = (Transaction) o;
-        return Objects.equals(transaction_id, that.transaction_id) &&
+        TransactionAction that = (TransactionAction) o;
+        return isCreate == that.isCreate &&
+                Objects.equals(commitDate, that.commitDate) &&
+                Objects.equals(transaction_id, that.transaction_id) &&
                 Objects.equals(user_id, that.user_id) &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(date, that.date) &&
                 Objects.equals(note, that.note) &&
-                Objects.equals(category, that.category) &&
-                Objects.equals(commitDate, that.commitDate);
+                Objects.equals(category_id, that.category_id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transaction_id, user_id, amount, date, note, category, commitDate);
+        return Objects.hash(isCreate, commitDate, transaction_id, user_id, amount, date, note, category_id);
     }
 
     @Override
@@ -77,14 +92,20 @@ public class Transaction extends Action implements Serializable {
         return "transaction";
     }
 
-    @Override
     public boolean isCreate() {
-        return true;
+        return isCreate;
     }
 
-    @Override
     public void setCreate(boolean create) {
+        isCreate = create;
+    }
 
+    public Date getCommitDate() {
+        return commitDate;
+    }
+
+    public void setCommitDate(Date commitDate) {
+        this.commitDate = commitDate;
     }
 
     public Long getTransaction_id() {
@@ -111,14 +132,6 @@ public class Transaction extends Action implements Serializable {
         this.amount = amount;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public Date getDate() {
         return date;
     }
@@ -135,11 +148,11 @@ public class Transaction extends Action implements Serializable {
         this.note = note;
     }
 
-    public Date getCommitDate() {
-        return commitDate;
+    public Long getCategory_id() {
+        return category_id;
     }
 
-    public void setCommitDate(Date commitDate) {
-        this.commitDate = commitDate;
+    public void setCategory_id(Long category_id) {
+        this.category_id = category_id;
     }
 }
