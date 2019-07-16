@@ -1,18 +1,17 @@
 package FinanceManager_Server.Database.Entity;
 
 import FinanceManager_Server.Database.Entity.Database_pk.BudgetPK;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
 @Table(name = "budget_action")
 @IdClass(BudgetPK.class)
+@JsonIgnoreProperties
 public class BudgetAction extends Action implements Serializable {
 
     private static final long serialVersionUID = 574580749152845095L;
@@ -25,14 +24,14 @@ public class BudgetAction extends Action implements Serializable {
 
 
     @Id
-    @Column(name = "budget_id")
+    @Column(name = "budget")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long budget_id;
+    private Long budget;
 
 
     @Id
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user")
+    private Long user;
 
 
     @Column(name = "name")
@@ -56,18 +55,30 @@ public class BudgetAction extends Action implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "budget_category", joinColumns = {
-            @JoinColumn(name = "budget_id", referencedColumnName = "budget_id"),
-            @JoinColumn(name = "budget_user", referencedColumnName = "user_id")
+            @JoinColumn(name = "budget", referencedColumnName = "budget"),
+            @JoinColumn(name = "budget_user", referencedColumnName = "user")
     }, inverseJoinColumns = {
-            @JoinColumn(name = "category_id", referencedColumnName = "category_id"),
-            @JoinColumn(name = "category_user", referencedColumnName = "user_id")
+            @JoinColumn(name = "category", referencedColumnName = "category"),
+            @JoinColumn(name = "category_user", referencedColumnName = "user")
     })
     private Set<Category> categories = new HashSet<>();
+
+    public static ArrayList<BudgetAction> toBudgetAction(Collection<Budget> c){
+        if(c == null){
+            return new ArrayList<>();
+        }
+        ArrayList<BudgetAction> arrayList = new ArrayList<>(c.size());
+        for(Budget b : c){
+            arrayList.add(new BudgetAction(true, b));
+        }
+        return arrayList;
+    }
+
 
     public BudgetAction(boolean isCreate, Date commitDate, Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Set<Category> categories) {
         this.isCreate = isCreate;
         this.commitDate = commitDate;
-        this.user_id = user_id;
+        this.user = user_id;
         this.name = name;
         this.amount = amount;
         this.start = start;
@@ -79,10 +90,10 @@ public class BudgetAction extends Action implements Serializable {
     public BudgetAction() {
     }
 
-    public BudgetAction(boolean isCreate, Date commitDate, Budget budget) {
+    public BudgetAction(boolean isCreate, Budget budget) {
         this.isCreate = isCreate;
-        this.commitDate = commitDate;
-        this.user_id = budget.getUser_id();
+        this.commitDate = budget.getCommitDate();
+        this.user = budget.getUser();
         this.name = budget.getName();
         this.amount = budget.getAmount();
         this.start = budget.getStart();
@@ -123,8 +134,8 @@ public class BudgetAction extends Action implements Serializable {
         BudgetAction that = (BudgetAction) o;
         return isCreate == that.isCreate &&
                 Objects.equals(commitDate, that.commitDate) &&
-                Objects.equals(budget_id, that.budget_id) &&
-                Objects.equals(user_id, that.user_id) &&
+                Objects.equals(budget, that.budget) &&
+                Objects.equals(user, that.user) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(start, that.start) &&
@@ -135,24 +146,24 @@ public class BudgetAction extends Action implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(isCreate, commitDate, budget_id, user_id, name, amount, start, end, notifyLevel, categories);
+        return Objects.hash(isCreate, commitDate, budget, user, name, amount, start, end, notifyLevel, categories);
     }
 
 
-    public Long getBudget_id() {
-        return budget_id;
+    public Long getBudget() {
+        return budget;
     }
 
-    public void setBudget_id(Long budget_id) {
-        this.budget_id = budget_id;
+    public void setBudget(Long budget) {
+        this.budget = budget;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public Long getUser() {
+        return user;
     }
 
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+    public void setUser(Long user) {
+        this.user = user;
     }
 
     public String getName() {

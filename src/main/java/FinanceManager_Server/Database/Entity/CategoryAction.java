@@ -2,14 +2,15 @@ package FinanceManager_Server.Database.Entity;
 
 
 import FinanceManager_Server.Database.Entity.Database_pk.CategoryPK;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "category_action")
+@JsonIgnoreProperties
 @IdClass(CategoryPK.class)
 public class CategoryAction extends Action implements Serializable {
 
@@ -22,12 +23,12 @@ public class CategoryAction extends Action implements Serializable {
     private Date commitDate;
 
     @Id
-    @Column(name = "category_id")
-    private Long category_id;
+    @Column(name = "category")
+    private Long category;
 
     @Id
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user")
+    private Long user;
 
     @Column(name = "color")
     private String color;
@@ -41,11 +42,22 @@ public class CategoryAction extends Action implements Serializable {
     @Column(name = "parent_id")
     private Long parent_id;
 
+    public static ArrayList<CategoryAction> toCategoryAction(Collection<Category> c){
+        if (c == null){
+            return new ArrayList<>();
+        }
+        ArrayList<CategoryAction> arrayList = new ArrayList<>(c.size());
+        for(Category b : c){
+            arrayList.add(new CategoryAction(true, b));
+        }
+        return arrayList;
+    }
+
     public CategoryAction(boolean isCreate, Date commitDate, Long category_id, Long user_id, String color, String name, Integer icon_id, Long parent_id) {
         this.isCreate = isCreate;
         this.commitDate = commitDate;
-        this.category_id = category_id;
-        this.user_id = user_id;
+        this.category = category_id;
+        this.user = user_id;
         this.color = color;
         this.name = name;
         this.icon_id = icon_id;
@@ -55,15 +67,15 @@ public class CategoryAction extends Action implements Serializable {
     public CategoryAction() {
     }
 
-    public CategoryAction(boolean isCreate, Date commitDate, Category category) {
+    public CategoryAction(boolean isCreate, Category category) {
         this.isCreate = isCreate;
-        this.commitDate = commitDate;
-        this.category_id = category.getCategory_id();
-        this.user_id = category.getUser_id();
+        this.commitDate = category.getCommitDate();
+        this.category = category.getCategory();
+        this.user = category.getUser();
         this.color = category.getColor();
         this.name = category.getName();
         this.icon_id = category.getIcon_id();
-        this.parent_id = category.getParent().getCategory_id();
+        this.parent_id = category.getParent().getCategory();
     }
 
     @Override
@@ -73,8 +85,8 @@ public class CategoryAction extends Action implements Serializable {
         CategoryAction that = (CategoryAction) o;
         return isCreate == that.isCreate &&
                 Objects.equals(commitDate, that.commitDate) &&
-                Objects.equals(category_id, that.category_id) &&
-                Objects.equals(user_id, that.user_id) &&
+                Objects.equals(category, that.category) &&
+                Objects.equals(user, that.user) &&
                 Objects.equals(color, that.color) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(icon_id, that.icon_id) &&
@@ -83,7 +95,7 @@ public class CategoryAction extends Action implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(isCreate, commitDate, category_id, user_id, color, name, icon_id, parent_id);
+        return Objects.hash(isCreate, commitDate, category, user, color, name, icon_id, parent_id);
     }
 
     @Override
@@ -107,20 +119,20 @@ public class CategoryAction extends Action implements Serializable {
         this.commitDate = commitDate;
     }
 
-    public Long getCategory_id() {
-        return category_id;
+    public Long getCategory() {
+        return category;
     }
 
-    public void setCategory_id(Long category_id) {
-        this.category_id = category_id;
+    public void setCategory(Long category) {
+        this.category = category;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public Long getUser() {
+        return user;
     }
 
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+    public void setUser(Long user) {
+        this.user = user;
     }
 
     public String getColor() {

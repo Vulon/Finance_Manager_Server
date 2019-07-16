@@ -16,12 +16,12 @@ public class Transaction extends Action implements Serializable {
     private static final long serialVersionUID = -5744874026510540290L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "transaction_id")
-    private Long transaction_id;
+    @Column(name = "transaction")
+    private Long transaction;
 
     @Id
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user")
+    private Long user;
 
     @Column(name = "amount")
     private Double amount;
@@ -42,12 +42,21 @@ public class Transaction extends Action implements Serializable {
     private Date commitDate;
 
     public Transaction(Long user_id, Double amount, Date date, String note, Category category, Date commitDate) {
-        this.user_id = user_id;
+        this.user = user_id;
         this.amount = amount;
         this.date = date;
         this.note = note;
         this.category = category;
         this.commitDate = commitDate;
+    }
+
+    public Transaction(TransactionAction action, Category category){
+        this.user = action.getUser();
+        this.amount = action.getAmount();
+        this.date = action.getDate();
+        this.note = action.getNote();
+        this.category = category;
+        this.commitDate = action.getCommitDate();
     }
 
     public Transaction() {
@@ -58,8 +67,8 @@ public class Transaction extends Action implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return Objects.equals(transaction_id, that.transaction_id) &&
-                Objects.equals(user_id, that.user_id) &&
+        return Objects.equals(transaction, that.transaction) &&
+                Objects.equals(user, that.user) &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(date, that.date) &&
                 Objects.equals(note, that.note) &&
@@ -69,7 +78,7 @@ public class Transaction extends Action implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(transaction_id, user_id, amount, date, note, category, commitDate);
+        return Objects.hash(transaction, user, amount, date, note, category, commitDate);
     }
 
     @Override
@@ -87,20 +96,20 @@ public class Transaction extends Action implements Serializable {
 
     }
 
-    public Long getTransaction_id() {
-        return transaction_id;
+    public Long getTransaction() {
+        return transaction;
     }
 
-    public void setTransaction_id(Long transaction_id) {
-        this.transaction_id = transaction_id;
+    public void setTransaction(Long transaction) {
+        this.transaction = transaction;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public Long getUser() {
+        return user;
     }
 
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+    public void setUser(Long user) {
+        this.user = user;
     }
 
     public Double getAmount() {

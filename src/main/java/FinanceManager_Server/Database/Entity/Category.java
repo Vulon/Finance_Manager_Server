@@ -15,12 +15,12 @@ public class Category extends Action implements Serializable {
     private static final long serialVersionUID = -6265203350166782424L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "category_id")
-    private Long category_id;
+    @Column(name = "category")
+    private Long category;
 
     @Id
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user")
+    private Long user;
 
     @Column(name = "color")
     private String color;
@@ -42,12 +42,20 @@ public class Category extends Action implements Serializable {
     }
 
     public Category(Long user_id, String color, String name, Integer icon_id, Category parent, Date commitDate) {
-        this.user_id = user_id;
+        this.user = user_id;
         this.color = color;
         this.name = name;
         this.icon_id = icon_id;
         this.parent = parent;
         this.commitDate = commitDate;
+    }
+    public Category(CategoryAction action, Category parent){
+        this.user = action.getUser();
+        this.color = action.getColor();
+        this.name = action.getName();
+        this.icon_id = action.getIcon_id();
+        this.parent = parent;
+        this.commitDate = action.getCommitDate();
     }
 
     @Override
@@ -55,8 +63,8 @@ public class Category extends Action implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Category category = (Category) o;
-        return Objects.equals(category_id, category.category_id) &&
-                Objects.equals(user_id, category.user_id) &&
+        return Objects.equals(this.category, category.category) &&
+                Objects.equals(user, category.user) &&
                 Objects.equals(color, category.color) &&
                 Objects.equals(name, category.name) &&
                 Objects.equals(icon_id, category.icon_id) &&
@@ -66,7 +74,7 @@ public class Category extends Action implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(category_id, user_id, color, name, icon_id, parent, commitDate);
+        return Objects.hash(category, user, color, name, icon_id, parent, commitDate);
     }
 
     @Override
@@ -91,20 +99,20 @@ public class Category extends Action implements Serializable {
     public void setParent(Category parent) {
         this.parent = parent;
     }
-    public Long getCategory_id() {
-        return category_id;
+    public Long getCategory() {
+        return category;
     }
 
-    public void setCategory_id(Long category_id) {
-        this.category_id = category_id;
+    public void setCategory(Long category) {
+        this.category = category;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public Long getUser() {
+        return user;
     }
 
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+    public void setUser(Long user) {
+        this.user = user;
     }
 
     public String getColor() {

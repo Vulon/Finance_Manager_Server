@@ -16,14 +16,14 @@ import java.util.Set;
 public class Budget extends Action implements Serializable {
     private static final long serialVersionUID = -5300057576001284517L;
     @Id
-    @Column(name = "budget_id")
+    @Column(name = "budget")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long budget_id;
+    private Long budget;
 
 
     @Id
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user")
+    private Long user;
 
 
     @Column(name = "name")
@@ -49,11 +49,11 @@ public class Budget extends Action implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "budget_category", joinColumns = {
-            @JoinColumn(name = "budget_id", referencedColumnName = "budget_id"),
-            @JoinColumn(name = "budget_user", referencedColumnName = "user_id")
+            @JoinColumn(name = "budget", referencedColumnName = "budget"),
+            @JoinColumn(name = "budget_user", referencedColumnName = "user")
     }, inverseJoinColumns = {
-            @JoinColumn(name = "category_id", referencedColumnName = "category_id"),
-            @JoinColumn(name = "category_user", referencedColumnName = "user_id")
+            @JoinColumn(name = "category", referencedColumnName = "category"),
+            @JoinColumn(name = "category_user", referencedColumnName = "user")
     })
     private Set<Category> categories = new HashSet<>();
 
@@ -68,7 +68,7 @@ public class Budget extends Action implements Serializable {
 
 
     public Budget(Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Date commitDate, Set<Category> categories) {
-        this.user_id = user_id;
+        this.user = user_id;
         this.name = name;
         this.amount = amount;
         this.start = start;
@@ -78,14 +78,24 @@ public class Budget extends Action implements Serializable {
         this.categories = categories;
     }
 
+    public Budget(BudgetAction action){
+        this.name = action.getName();
+        this.amount = action.getAmount();
+        this.start = action.getStart();
+        this.end = action.getEnd();
+        this.notifyLevel = action.getNotifyLevel();
+        this.commitDate = action.getCommitDate();
+        this.categories = action.getCategories();
+    }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Budget budget = (Budget) o;
-        return Objects.equals(budget_id, budget.budget_id) &&
-                Objects.equals(user_id, budget.user_id) &&
+        return Objects.equals(this.budget, budget.budget) &&
+                Objects.equals(user, budget.user) &&
                 Objects.equals(name, budget.name) &&
                 Objects.equals(amount, budget.amount) &&
                 Objects.equals(start, budget.start) &&
@@ -97,7 +107,7 @@ public class Budget extends Action implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(budget_id, user_id, name, amount, start, end, notifyLevel, commitDate, categories);
+        return Objects.hash(budget, user, name, amount, start, end, notifyLevel, commitDate, categories);
     }
 
     @Override
@@ -112,23 +122,29 @@ public class Budget extends Action implements Serializable {
 
     @Override
     public void setCreate(boolean create) {
-
     }
 
-    public Long getBudget_id() {
-        return budget_id;
+    public void addCategory(Category c){
+        if(categories == null){
+            categories = new HashSet<>();
+        }
+        this.categories.add(c);
     }
 
-    public void setBudget_id(Long budget_id) {
-        this.budget_id = budget_id;
+    public Long getBudget() {
+        return budget;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public void setBudget(Long budget) {
+        this.budget = budget;
     }
 
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+    public Long getUser() {
+        return user;
+    }
+
+    public void setUser(Long user) {
+        this.user = user;
     }
 
     public Set<Category> getCategories() {

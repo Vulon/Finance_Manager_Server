@@ -8,10 +8,7 @@ import FinanceManager_Server.Database.Entity.TransactionAction;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @JsonIgnoreProperties
@@ -29,7 +26,7 @@ public class ActionQueue implements Serializable {
         temp.addAll(transactionActions);
         temp.addAll(categoryActions);
         Collections.sort(temp);
-        return new LinkedBlockingQueue<>(temp);
+        return new LinkedList<Action>(temp);
     }
 
 
@@ -37,6 +34,12 @@ public class ActionQueue implements Serializable {
         budgetActions = new ArrayList<>();
         transactionActions = new ArrayList<>();
         categoryActions = new ArrayList<>();
+    }
+
+    public void addAll(ActionQueue queue){
+        this.budgetActions.addAll(queue.getBudgetActions());
+        this.categoryActions.addAll(queue.getCategoryActions());
+        this.transactionActions.addAll(queue.getTransactionActions());
     }
 
 

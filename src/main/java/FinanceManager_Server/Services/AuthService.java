@@ -75,7 +75,10 @@ public class AuthService {
     public Claims getClaims(String token){
         return Jwts.parser().setSigningKey(propertiesDataManager.getEncodedSecretKey())
                 .parseClaimsJws(token).getBody();
+    }
 
+    public Long getUserId(String token){
+        return Long.parseLong(getClaims(token).getSubject());
     }
 
     public boolean tokenHasErrors(String token, boolean isAccessToken){

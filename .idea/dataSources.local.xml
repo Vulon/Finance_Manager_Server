@@ -11,5 +11,14 @@
       <user-name>springuser</user-name>
       <introspection-schemas>*:@</introspection-schemas>
     </data-source>
+    <data-source name="H2 - db_finance_manager_server" uuid="99329b6b-6643-42dd-9811-939629302408">
+      <database-info product="H2" version="1.4.196 (2017-06-10)" jdbc-version="4.0" driver-name="H2 JDBC Driver" driver-version="1.4.196 (2017-06-10)" dbms="H2" exact-version="1.4.196" exact-driver-version="1.4">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="upper" quoted-identifiers="exact" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>springuser</user-name>
+      <introspection-schemas>@:@</introspection-schemas>
+    </data-source>
   </component>
 </project>

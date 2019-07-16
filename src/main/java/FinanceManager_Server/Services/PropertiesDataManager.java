@@ -13,7 +13,7 @@ public class PropertiesDataManager implements Serializable {
 
     private static final long serialVersionUID = 8571137094210487341L;
     private SecretData secretData = null;
-    public static String SERVER_ADDRESS = "http://localhost:8080";
+    public static String SERVER_ADDRESS = "http://localhost:8081";
 
     public PropertiesDataManager() {
     }
