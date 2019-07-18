@@ -2,21 +2,21 @@ package FinanceManager_Server.Database.Entity;
 
 import java.util.Date;
 
-public abstract class Action implements Comparable{
+public interface Action extends Comparable{
 
     @Override
-    public int compareTo(Object o) {
+    default public int compareTo(Object o) {
         Action other = (Action)o;
         return Long.compare(this.getCommitDate().getTime(), other.getCommitDate().getTime());
     }
 
-    public abstract Date getCommitDate();
+    Date getCommitDate();
 
-    public abstract void setCommitDate(Date commitDate);
+    void setCommitDate(Date commitDate);
 
-    public abstract String getType();
+    String getType();
 
-    public abstract boolean isCreate();
+    boolean isCreate();
 
-    public abstract void setCreate(boolean create);
+    void setCreate(boolean create);
 }

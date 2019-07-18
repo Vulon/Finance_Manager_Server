@@ -22,9 +22,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query
     List<Transaction> getAllByCategory(Category category);
 
-    @Query(value = "SELECT MAX(t.transaction) FROM Transaction t WHERE t.user = :user_id")
-    Long getMaxId(@Param(value = "user_id") Long user);
-
     @Query
     Transaction getByUserAndTransaction(Long user, Long transaction);
+
+    @Query(value = "SELECT MAX(t.transaction) FROM Transaction t WHERE t.user = :user_id")
+    Long getMaxId(@Param(value = "user_id") Long user);
 }

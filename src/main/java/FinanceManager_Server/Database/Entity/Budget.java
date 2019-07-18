@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Entity
 @IdClass(BudgetPK.class)
-public class Budget extends Action implements Serializable {
+public class Budget implements Serializable, Action {
     private static final long serialVersionUID = -5300057576001284517L;
     @Id
     @Column(name = "budget")
@@ -79,6 +79,7 @@ public class Budget extends Action implements Serializable {
     }
 
     public Budget(BudgetAction action){
+        this.user = action.getUser();
         this.name = action.getName();
         this.amount = action.getAmount();
         this.start = action.getStart();

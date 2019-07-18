@@ -107,7 +107,7 @@ public class DataRestController {
         return new ResponseEntity<>(completedActions, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.OK));
     }
 
-    private Long generateFreeId(Long user_id, String repositoryClassName){
+    /*private Long generateFreeId(Long user_id, String repositoryClassName){ Id conflict resolving moved to client
         if(repositoryClassName.equals(budgetRepository.getClass().getName())){
             return budgetRepository.getMaxId(user_id) + 1;
         }else if(repositoryClassName.equals(categoryRepository.getClass().getName())){
@@ -118,7 +118,7 @@ public class DataRestController {
             return -1l;
         }
 
-    }
+    }*/
 
     private ActionQueue processActionQueue(Long user_id, Queue<Action> actions){
         ActionQueue completedActions = new ActionQueue();
@@ -130,10 +130,10 @@ public class DataRestController {
                     try{
                         if(transactionAction.isCreate()){
                             Category category = categoryRepository.getByUserAndCategory(user_id, transactionAction.getCategory_id());
-                            if(transactionRepository.getByUserAndTransaction(user_id, transactionAction.getTransaction()) != null){
-                                Long freeId = generateFreeId(user_id, transactionRepository.getClass().getName());
-                                transactionAction.setTransaction(freeId);
-                            }
+//                            if(transactionRepository.getByUserAndTransaction(user_id, transactionAction.getTransaction()) != null){
+//                                Long freeId = generateFreeId(user_id, transactionRepository.getClass().getName());
+//                                transactionAction.setTransaction(freeId);
+//                            }
                             transactionRepository.saveAndFlush(new Transaction(transactionAction, category));
                         }else{
                             transactionRepository.deleteByUserAndTransaction(user_id, transactionAction.getTransaction());
@@ -155,10 +155,10 @@ public class DataRestController {
                     BudgetAction budgetAction = (BudgetAction) action;
                     try{
                         if(budgetAction.isCreate()){
-                            if(budgetRepository.findByUserAndBudget(user_id, budgetAction.getBudget()) != null){
-                                Long freeId = generateFreeId(user_id, budgetRepository.getClass().getName());
-                                budgetAction.setBudget(freeId);
-                            }
+//                            if(budgetRepository.findByUserAndBudget(user_id, budgetAction.getBudget()) != null){
+//                                Long freeId = generateFreeId(user_id, budgetRepository.getClass().getName());
+//                                budgetAction.setBudget(freeId);
+//                            }
                             Set<Category> categoriesOld = budgetAction.getCategories();
                             Budget budget = new Budget(budgetAction);
                             budget.setCategories(new HashSet<>());
@@ -186,10 +186,10 @@ public class DataRestController {
                 case "category":{
                     CategoryAction categoryAction = (CategoryAction) action;
                     if(categoryAction.isCreate()){
-                        if(categoryRepository.getByUserAndCategory(user_id, categoryAction.getCategory()) != null){
-                            Long freeId = generateFreeId(user_id, categoryRepository.getClass().getName());
-                            categoryAction.setCategory(freeId);
-                        }
+//                        if(categoryRepository.getByUserAndCategory(user_id, categoryAction.getCategory()) != null){
+//                            Long freeId = generateFreeId(user_id, categoryRepository.getClass().getName());
+//                            categoryAction.setCategory(freeId);
+//                        }
                         Category parent = categoryRepository.getByUserAndCategory(user_id, categoryAction.getParent_id());
                         categoryRepository.saveAndFlush(new Category(categoryAction, parent));
                     }else{
@@ -198,34 +198,40 @@ public class DataRestController {
                         List<Budget> budgetList = budgetRepository.getAllByUserAndCategory(user_id, thisCategory);
                         for(Budget b : budgetList){ //Clear category reference in budget tables
                             try{
-                                budgetRepository.deleteByUserAndBudget(b.getUser(), b.getBudget());
-                                budgetRepository.flush();
                                 Set<Category> temp = b.getCategories();
                                 temp.remove(thisCategory);
                                 temp.add(parent);
                                 b.setCategories(temp);
-                                budgetRepository.saveAndFlush(b);
+                                budgetRepository.save(b);
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
                         }
+                        budgetRepository.flush();
                         List<Transaction> transactionList = transactionRepository.getAllByCategory(thisCategory);
                         for(Transaction t : transactionList){ //Clear category reference in transaction table
                             try{
-                                transactionRepository.deleteByUserAndTransaction(user_id, t.getTransaction());
-                                transactionRepository.flush();
                                 t.setCategory(parent);
-                                transactionRepository.saveAndFlush(t);
+                                transactionRepository.save(t);
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
                         }
+                        transactionRepository.flush();
                         int size = categoryActionRepository.countByUserAndCategory(user_id, categoryAction.getCategory());
                         if(size > MAX_DELETE_STACK_SIZE){
                             categoryActionRepository.deleteOldest(user_id);
                             categoryActionRepository.flush();
                         }
                         categoryActionRepository.saveAndFlush(categoryAction);
+                        //DELETE category from database and update all children
+                        ArrayList<Category> categoryArrayList = categoryRepository.getAllByUserAndAndParent(user_id, thisCategory);
+                        for(Category c : categoryArrayList){
+                            c.setParent(parent);
+                            categoryRepository.save(c);
+                        }
+                        categoryRepository.deleteByUserAndCategory(user_id, thisCategory.getCategory());
+                        categoryRepository.flush();
                     }
                     completedActions.addCategoryAction(categoryAction);
                 }

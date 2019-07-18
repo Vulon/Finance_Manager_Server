@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "category")
 @IdClass(CategoryPK.class)
-public class Category extends Action implements Serializable {
+public class Category  implements Serializable, Action {
     private static final long serialVersionUID = -6265203350166782424L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

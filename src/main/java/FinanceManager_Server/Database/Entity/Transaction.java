@@ -12,7 +12,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "transaction")
 @IdClass(TransactionPK.class)
-public class Transaction extends Action implements Serializable {
+public class Transaction implements Serializable, Action {
     private static final long serialVersionUID = -5744874026510540290L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
