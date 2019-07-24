@@ -39,7 +39,9 @@ public class DataRestController {
     }
 
     @GetMapping(name = "/api/get_updates")
-    public ResponseEntity<ActionQueue> getUpdates(String access_token, Date last_update){
+    public ResponseEntity<ActionQueue> getUpdates(String access_token, long last_update){
+        Date update_date = new Date();
+        update_date.setTime(last_update);
         if(authService.tokenHasErrors(access_token, true)){
             return  new ResponseEntity<>(null, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.INVALID_TOKEN));
         }
@@ -51,22 +53,32 @@ public class DataRestController {
         if(!user.getAccess_token().equals(access_token)){
             return  new ResponseEntity<>(null, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.INVALID_TOKEN));
         }
-        ArrayList<CategoryAction> categoryActions = CategoryAction.toCategoryAction(categoryRepository.getAllByCommitDateAfter(last_update));
+        System.out.println("GET UPDATES: update date is " + last_update);
+        ArrayList<CategoryAction> categoryActions = CategoryAction.toCategoryAction(categoryRepository.getAllByUserAndCommitDateAfter(user.getId() ,update_date));
+        System.out.println("Found " + categoryActions.size() + " category updates after that date");
+        {//debug
+            ArrayList<Category> allCategories = categoryRepository.findAllByUser(user.getId());
+            System.out.println("All categories count: " + allCategories.size());
+            for(Category c : allCategories){
+                System.out.println(c.toString() + "  -||- " + c.getCommitDate().getTime());
+            }
+        }
+
         {
-            ArrayList<CategoryAction> temp = (ArrayList<CategoryAction>)categoryActionRepository.getAllByCommitDateAfter(last_update);
+            ArrayList<CategoryAction> temp = (ArrayList<CategoryAction>)categoryActionRepository.getAllByCommitDateAfter(update_date);
             if(temp != null)
                 categoryActions.addAll(temp);
         }
-        ArrayList<TransactionAction> transactionActions = TransactionAction.toTransactionAction(transactionRepository.getAllByCommitDateAfter(last_update));
+        ArrayList<TransactionAction> transactionActions = TransactionAction.toTransactionAction(transactionRepository.getAllByCommitDateAfter(update_date));
         {
-            ArrayList<TransactionAction> temp = (ArrayList<TransactionAction>)transactionActionRepository.getAllByCommitDateAfter(last_update);
+            ArrayList<TransactionAction> temp = (ArrayList<TransactionAction>)transactionActionRepository.getAllByCommitDateAfter(update_date);
             if(temp != null){
                 transactionActions.addAll(temp);
             }
         }
-        ArrayList<BudgetAction> budgetActions = BudgetAction.toBudgetAction(budgetRepository.getAllByCommitDateAfter(last_update));
+        ArrayList<BudgetAction> budgetActions = BudgetAction.toBudgetAction(budgetRepository.getAllByCommitDateAfter(update_date));
         {
-            ArrayList<BudgetAction> temp = (ArrayList<BudgetAction>)budgetActionRepository.getAllByCommitDateAfter(last_update);
+            ArrayList<BudgetAction> temp = (ArrayList<BudgetAction>)budgetActionRepository.getAllByCommitDateAfter(update_date);
             if(temp != null){
                 budgetActions.addAll(temp);
             }
@@ -107,18 +119,7 @@ public class DataRestController {
         return new ResponseEntity<>(completedActions, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.OK));
     }
 
-    /*private Long generateFreeId(Long user_id, String repositoryClassName){ Id conflict resolving moved to client
-        if(repositoryClassName.equals(budgetRepository.getClass().getName())){
-            return budgetRepository.getMaxId(user_id) + 1;
-        }else if(repositoryClassName.equals(categoryRepository.getClass().getName())){
-            return categoryRepository.getMaxId(user_id) + 1;
-        }else if(repositoryClassName.equals(transactionRepository.getClass().getName())){
-            return transactionRepository.getMaxId(user_id) + 1;
-        }else{
-            return -1l;
-        }
 
-    }*/
 
     private ActionQueue processActionQueue(Long user_id, Queue<Action> actions){
         ActionQueue completedActions = new ActionQueue();

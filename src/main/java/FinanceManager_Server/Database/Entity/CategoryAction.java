@@ -69,13 +69,18 @@ public class CategoryAction implements Serializable, Action {
 
     public CategoryAction(boolean isCreate, Category category) {
         this.create = isCreate;
+
         this.commitDate = category.getCommitDate();
         this.category = category.getCategory();
         this.user = category.getUser();
         this.color = category.getColor();
         this.name = category.getName();
         this.icon_id = category.getIcon_id();
-        this.parent_id = category.getParent().getCategory();
+        if(category.getParent() == null){
+            this.parent_id = -1l;
+        }else{
+            this.parent_id = category.getParent().getCategory();
+        }
     }
 
     @Override

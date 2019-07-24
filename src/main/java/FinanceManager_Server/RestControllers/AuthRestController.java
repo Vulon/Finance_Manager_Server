@@ -1,6 +1,7 @@
 package FinanceManager_Server.RestControllers;
 
 
+import FinanceManager_Server.Database.Entity.Category;
 import FinanceManager_Server.Database.Repositories.BudgetRepository;
 import FinanceManager_Server.Database.Repositories.CategoryRepository;
 import FinanceManager_Server.Database.Entity.User;
@@ -74,6 +75,7 @@ public class AuthRestController {
             user = new User(email, password, lang, Boolean.FALSE, "", "");
             System.out.println("Saving " + user);
             userRepository.saveAndFlush(user);
+            create_base_categories(user.getEmail());
         }else if (user.getVerified() == Boolean.TRUE){
             return new ResponseEntity<>("ALREADY_REGISTERED", mapResponseCode(ServerResponseCode.ALREADY_REGISTERED));
         }
@@ -102,6 +104,7 @@ public class AuthRestController {
             return new ResponseEntity<>("Token mismatch", mapResponseCode(ServerResponseCode.INVALID_TOKEN));
         }
         userRepository.setUserVerifiedField(user.getId(), Boolean.TRUE);
+
         return new ResponseEntity<>("Email verified", mapResponseCode(ServerResponseCode.OK));
     }
 
@@ -152,10 +155,24 @@ public class AuthRestController {
 
 
     @RequestMapping(value = "/clear")
-    public ResponseEntity<String> clear(){
-
+    @ResponseBody
+    public String clear(){
         userRepository.deleteAll();
-        return new ResponseEntity<>("DELETED", HttpStatus.OK);
+        return "DELETED";
+    }
+
+    private void create_base_categories(String user_email){
+        User user = userRepository.findByEmail(user_email);
+        Category income = new Category(user.getId(), "#1fed45", "Income", 1, null, Date.from(Instant.now()));
+        Category expense = new Category(user.getId(), "#4e7dea", "Expense", 0, null, Date.from(Instant.now()));
+        income.setCategory(1l);
+        expense.setCategory(0l);
+        System.out.println("CREATE_BASE_CATEGORIES ");
+        System.out.println("Created " + income);
+        System.out.println("Created " + expense);
+        categoryRepository.saveAndFlush(income);
+        categoryRepository.saveAndFlush(expense);
+        System.out.println("SAVED CATEGORIES TO REPOSITORY");
     }
 
 

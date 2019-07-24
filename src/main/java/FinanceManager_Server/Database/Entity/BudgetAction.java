@@ -53,7 +53,7 @@ public class BudgetAction  implements Serializable, Action {
     private Float notifyLevel;
 
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "budget_category", joinColumns = {
             @JoinColumn(name = "budget", referencedColumnName = "budget"),
             @JoinColumn(name = "budget_user", referencedColumnName = "user")
@@ -93,6 +93,7 @@ public class BudgetAction  implements Serializable, Action {
     public BudgetAction(boolean isCreate, Budget budget) {
         this.create = isCreate;
         this.commitDate = budget.getCommitDate();
+        this.budget = budget.getBudget();
         this.user = budget.getUser();
         this.name = budget.getName();
         this.amount = budget.getAmount();

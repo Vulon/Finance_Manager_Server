@@ -69,6 +69,7 @@ public class TransactionAction implements Serializable, Action {
     public TransactionAction(boolean isCreate, Transaction transaction) {
         this.create = isCreate;
         this.commitDate = transaction.getCommitDate();
+        this.transaction = transaction.getTransaction();
         this.user = transaction.getUser();
         this.amount = transaction.getAmount();
         this.date = transaction.getDate();

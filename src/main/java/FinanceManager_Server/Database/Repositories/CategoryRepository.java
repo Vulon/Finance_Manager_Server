@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query
-    List<Category> getAllByCommitDateAfter(Date date);
+    ArrayList<Category> getAllByUserAndCommitDateAfter(Long user, Date commitDate);
 
     @Query
     Category getByUserAndCategory(Long user_id, Long category_id);
@@ -28,4 +28,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query(value = "SELECT MAX(c.category) FROM Category c WHERE c.user = :user")
     Long getMaxId(@Param(value = "user") Long user_id);
+
+    @Query
+    ArrayList<Category> findAllByUser(Long user);
 }

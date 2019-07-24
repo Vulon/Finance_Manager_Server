@@ -79,6 +79,7 @@ public class Budget implements Serializable, Action {
     }
 
     public Budget(BudgetAction action){
+        this.budget = action.getBudget();
         this.user = action.getUser();
         this.name = action.getName();
         this.amount = action.getAmount();

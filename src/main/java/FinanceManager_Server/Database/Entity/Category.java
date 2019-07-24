@@ -50,6 +50,7 @@ public class Category  implements Serializable, Action {
         this.commitDate = commitDate;
     }
     public Category(CategoryAction action, Category parent){
+        this.category = action.getCategory();
         this.user = action.getUser();
         this.color = action.getColor();
         this.name = action.getName();
@@ -70,6 +71,19 @@ public class Category  implements Serializable, Action {
                 Objects.equals(icon_id, category.icon_id) &&
                 Objects.equals(parent, category.parent) &&
                 Objects.equals(commitDate, category.commitDate);
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "category=" + category +
+                ", user=" + user +
+                ", color='" + color + '\'' +
+                ", name='" + name + '\'' +
+                ", icon_id=" + icon_id +
+                ", parent=" + parent +
+                ", commitDate=" + commitDate +
+                '}';
     }
 
     @Override
