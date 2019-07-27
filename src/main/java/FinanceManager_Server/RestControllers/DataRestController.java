@@ -7,9 +7,7 @@ import FinanceManager_Server.Services.AuthService;
 import FinanceManager_Server.TransportableDataObjects.ActionQueue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -53,16 +51,8 @@ public class DataRestController {
         if(!user.getAccess_token().equals(access_token)){
             return  new ResponseEntity<>(null, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.INVALID_TOKEN));
         }
-        System.out.println("GET UPDATES: update date is " + last_update);
+        System.out.println("GET UPDATES: update date is " + update_date.toString());
         ArrayList<CategoryAction> categoryActions = CategoryAction.toCategoryAction(categoryRepository.getAllByUserAndCommitDateAfter(user.getId() ,update_date));
-        System.out.println("Found " + categoryActions.size() + " category updates after that date");
-        {//debug
-            ArrayList<Category> allCategories = categoryRepository.findAllByUser(user.getId());
-            System.out.println("All categories count: " + allCategories.size());
-            for(Category c : allCategories){
-                System.out.println(c.toString() + "  -||- " + c.getCommitDate().getTime());
-            }
-        }
 
         {
             ArrayList<CategoryAction> temp = (ArrayList<CategoryAction>)categoryActionRepository.getAllByCommitDateAfter(update_date);
@@ -87,12 +77,14 @@ public class DataRestController {
         Collections.sort(transactionActions);
         Collections.sort(budgetActions);
         ActionQueue actionQueue = new ActionQueue(budgetActions, transactionActions, categoryActions);
+        System.out.println("GET LAST UPDATES: found updates: " + actionQueue);
         return new ResponseEntity<>(actionQueue, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.OK));
     }
 
     @PostMapping(name = "/api/post_updates")
-    public ResponseEntity<ActionQueue> postUpdates(String access_token, ActionQueue actionQueue){
+    public ResponseEntity<ActionQueue> postUpdates(String access_token, @RequestBody ActionQueue actionQueue){
         Queue<Action> actions = actionQueue.getActionsQueue();
+
         if(authService.tokenHasErrors(access_token, true)){
             return new ResponseEntity<>(null, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.INVALID_TOKEN));
         }
@@ -103,7 +95,9 @@ public class DataRestController {
         if(!user.getAccess_token().equals(access_token)){
             return new ResponseEntity<>(null, AuthRestController.mapResponseCode(AuthRestController.ServerResponseCode.INVALID_TOKEN));
         }
+        System.out.println("POST UPDATES INITIATED for " + actionQueue);
         ActionQueue completedActions = processActionQueue(user.getId(), actions);
+        System.out.println("POST: Completed " + completedActions);
         if (actions.size() > completedActions.getActionsQueue().size()){ //try again for failed actions
             Queue<Action> completed = completedActions.getActionsQueue();
             LinkedList<Action> failedActions = new LinkedList<>();
@@ -131,20 +125,21 @@ public class DataRestController {
                     try{
                         if(transactionAction.isCreate()){
                             Category category = categoryRepository.getByUserAndCategory(user_id, transactionAction.getCategory_id());
-//                            if(transactionRepository.getByUserAndTransaction(user_id, transactionAction.getTransaction()) != null){
-//                                Long freeId = generateFreeId(user_id, transactionRepository.getClass().getName());
-//                                transactionAction.setTransaction(freeId);
-//                            }
-                            transactionRepository.saveAndFlush(new Transaction(transactionAction, category));
+                            Transaction transaction = new Transaction(transactionAction, category);
+                            transaction = transactionRepository.saveAndFlush(transaction);
+                            transactionAction.setTransaction(transaction.getTransaction());
+                            System.out.println("CREATED TRANSACTION " + transaction + " for user - " + user_id);
                         }else{
-                            transactionRepository.deleteByUserAndTransaction(user_id, transactionAction.getTransaction());
+                            transactionRepository.deleteByUserAndTransaction(user_id, transactionAction.getOriginalId());
                             transactionRepository.flush();
                             int size = transactionActionRepository.countByUserAndTransaction(user_id, transactionAction.getTransaction());
                             if(size >= MAX_DELETE_STACK_SIZE){
                                 transactionActionRepository.deleteOldest(user_id);
                                 transactionActionRepository.flush();
                             }
-                            transactionActionRepository.saveAndFlush(transactionAction);
+                            System.out.println("DELETED TRANSACTION " + transactionAction + " for user - " + user_id);
+
+                            transactionAction = transactionActionRepository.saveAndFlush(transactionAction);
                         }
                         completedActions.addTransactionAction(transactionAction);
                     }catch (Exception e){
@@ -156,19 +151,18 @@ public class DataRestController {
                     BudgetAction budgetAction = (BudgetAction) action;
                     try{
                         if(budgetAction.isCreate()){
-//                            if(budgetRepository.findByUserAndBudget(user_id, budgetAction.getBudget()) != null){
-//                                Long freeId = generateFreeId(user_id, budgetRepository.getClass().getName());
-//                                budgetAction.setBudget(freeId);
-//                            }
+//
                             Set<Category> categoriesOld = budgetAction.getCategories();
                             Budget budget = new Budget(budgetAction);
                             budget.setCategories(new HashSet<>());
                             for(Category c : categoriesOld){
                                 budget.addCategory(categoryRepository.getByUserAndCategory(user_id, c.getCategory()));
                             }
-                            budgetRepository.saveAndFlush(budget);
+                            budget = budgetRepository.saveAndFlush(budget);
+                            budgetAction.setBudget(budget.getBudget());
+
                         }else{
-                            budgetRepository.deleteByUserAndBudget(user_id, budgetAction.getBudget());
+                            budgetRepository.deleteByUserAndBudget(user_id, budgetAction.getOriginalId());
                             budgetRepository.flush();
                             int size = budgetActionRepository.countByUserAndBudget(user_id, budgetAction.getBudget());
                             if(size >= MAX_DELETE_STACK_SIZE){
@@ -176,7 +170,8 @@ public class DataRestController {
                                 budgetActionRepository.flush();
                             }
                             budgetAction.setCategories(new HashSet<>());
-                            budgetActionRepository.saveAndFlush(budgetAction);
+
+                            budgetAction = budgetActionRepository.saveAndFlush(budgetAction);
                         }
                         completedActions.addBudgetAction(budgetAction);
                     }catch (Exception e){
@@ -186,16 +181,15 @@ public class DataRestController {
                 }
                 case "category":{
                     CategoryAction categoryAction = (CategoryAction) action;
-                    if(categoryAction.isCreate()){
-//                        if(categoryRepository.getByUserAndCategory(user_id, categoryAction.getCategory()) != null){
-//                            Long freeId = generateFreeId(user_id, categoryRepository.getClass().getName());
-//                            categoryAction.setCategory(freeId);
-//                        }
+                    if(categoryAction.isCreate()){//
                         Category parent = categoryRepository.getByUserAndCategory(user_id, categoryAction.getParent_id());
-                        categoryRepository.saveAndFlush(new Category(categoryAction, parent));
+                        Category category = new Category(categoryAction, parent);
+                        category = categoryRepository.saveAndFlush(category);
+                        categoryAction.setCategory(category.getCategory());
+
                     }else{
                         Category parent = categoryRepository.getByUserAndCategory(user_id, categoryAction.getParent_id());
-                        Category thisCategory = categoryRepository.getByUserAndCategory(categoryAction.getUser(), categoryAction.getCategory());
+                        Category thisCategory = categoryRepository.getByUserAndCategory(categoryAction.getUser(), categoryAction.getOriginalId());
                         List<Budget> budgetList = budgetRepository.getAllByUserAndCategory(user_id, thisCategory);
                         for(Budget b : budgetList){ //Clear category reference in budget tables
                             try{
@@ -224,7 +218,7 @@ public class DataRestController {
                             categoryActionRepository.deleteOldest(user_id);
                             categoryActionRepository.flush();
                         }
-                        categoryActionRepository.saveAndFlush(categoryAction);
+                        categoryAction = categoryActionRepository.saveAndFlush(categoryAction);
                         //DELETE category from database and update all children
                         ArrayList<Category> categoryArrayList = categoryRepository.getAllByUserAndAndParent(user_id, thisCategory);
                         for(Category c : categoryArrayList){

@@ -42,6 +42,8 @@ public class CategoryAction implements Serializable, Action {
     @Column(name = "parent_id")
     private Long parent_id;
 
+    private Long originalId;
+
     public static ArrayList<CategoryAction> toCategoryAction(Collection<Category> c){
         if (c == null){
             return new ArrayList<>();
@@ -51,17 +53,6 @@ public class CategoryAction implements Serializable, Action {
             arrayList.add(new CategoryAction(true, b));
         }
         return arrayList;
-    }
-
-    public CategoryAction(boolean isCreate, Date commitDate, Long category_id, Long user_id, String color, String name, Integer icon_id, Long parent_id) {
-        this.create = isCreate;
-        this.commitDate = commitDate;
-        this.category = category_id;
-        this.user = user_id;
-        this.color = color;
-        this.name = name;
-        this.icon_id = icon_id;
-        this.parent_id = parent_id;
     }
 
     public CategoryAction() {
@@ -81,6 +72,16 @@ public class CategoryAction implements Serializable, Action {
         }else{
             this.parent_id = category.getParent().getCategory();
         }
+        this.originalId = category.getOriginalId();
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(Long originalId) {
+        this.originalId = originalId;
     }
 
     @Override
@@ -96,6 +97,22 @@ public class CategoryAction implements Serializable, Action {
                 Objects.equals(name, that.name) &&
                 Objects.equals(icon_id, that.icon_id) &&
                 Objects.equals(parent_id, that.parent_id);
+    }
+
+
+    @Override
+    public String toString() {
+        return "CategoryAction{" +
+                "create=" + create +
+                ", commitDate=" + commitDate +
+                ", category=" + category +
+                ", user=" + user +
+                ", color='" + color + '\'' +
+                ", name='" + name + '\'' +
+                ", icon_id=" + icon_id +
+                ", parent_id=" + parent_id +
+                ", originalId=" + originalId +
+                '}';
     }
 
     @Override
@@ -130,6 +147,7 @@ public class CategoryAction implements Serializable, Action {
 
     public void setCategory(Long category) {
         this.category = category;
+        originalId = category;
     }
 
     public Long getUser() {

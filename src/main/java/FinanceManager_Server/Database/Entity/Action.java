@@ -5,7 +5,7 @@ import java.util.Date;
 public interface Action extends Comparable{
 
     @Override
-    default public int compareTo(Object o) {
+    default int compareTo(Object o) {
         Action other = (Action)o;
         return Long.compare(this.getCommitDate().getTime(), other.getCommitDate().getTime());
     }
@@ -19,4 +19,6 @@ public interface Action extends Comparable{
     boolean isCreate();
 
     void setCreate(boolean create);
+
+    Long getOriginalId();
 }

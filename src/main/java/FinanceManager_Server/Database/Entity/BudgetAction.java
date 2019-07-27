@@ -52,6 +52,8 @@ public class BudgetAction  implements Serializable, Action {
     @Column(name = "notifyLevel")
     private Float notifyLevel;
 
+    private Long originalId;
+
 
     @ManyToMany
     @JoinTable(name = "budget_category", joinColumns = {
@@ -74,18 +76,11 @@ public class BudgetAction  implements Serializable, Action {
         return arrayList;
     }
 
-
-    public BudgetAction(boolean isCreate, Date commitDate, Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Set<Category> categories) {
-        this.create = isCreate;
-        this.commitDate = commitDate;
-        this.user = user_id;
-        this.name = name;
-        this.amount = amount;
-        this.start = start;
-        this.end = end;
-        this.notifyLevel = notifyLevel;
-        this.categories = new HashSet<>(categories);
+    @Override
+    public Long getOriginalId() {
+        return originalId;
     }
+
 
     public BudgetAction() {
     }
@@ -101,6 +96,7 @@ public class BudgetAction  implements Serializable, Action {
         this.end = budget.getEnd();
         this.notifyLevel = budget.getNotifyLevel();
         this.categories = new HashSet<>(budget.getCategories());
+        originalId = budget.getOriginalId();
     }
 
     @Override
@@ -126,6 +122,23 @@ public class BudgetAction  implements Serializable, Action {
     @Override
     public void setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
+    }
+
+    @Override
+    public String toString() {
+        return "BudgetAction{" +
+                "create=" + create +
+                ", commitDate=" + commitDate +
+                ", budget=" + budget +
+                ", user=" + user +
+                ", name='" + name + '\'' +
+                ", amount=" + amount +
+                ", start=" + start +
+                ", end=" + end +
+                ", notifyLevel=" + notifyLevel +
+                ", originalId=" + originalId +
+                ", categories=" + categories +
+                '}';
     }
 
     @Override
@@ -157,6 +170,7 @@ public class BudgetAction  implements Serializable, Action {
 
     public void setBudget(Long budget) {
         this.budget = budget;
+        originalId = budget;
     }
 
     public Long getUser() {
@@ -185,6 +199,10 @@ public class BudgetAction  implements Serializable, Action {
 
     public Date getStart() {
         return start;
+    }
+
+    public void setOriginalId(Long originalId) {
+        this.originalId = originalId;
     }
 
     public void setStart(Date start) {

@@ -2,11 +2,8 @@ package FinanceManager_Server.RestControllers;
 
 
 import FinanceManager_Server.Database.Entity.Category;
-import FinanceManager_Server.Database.Repositories.BudgetRepository;
-import FinanceManager_Server.Database.Repositories.CategoryRepository;
+import FinanceManager_Server.Database.Repositories.*;
 import FinanceManager_Server.Database.Entity.User;
-import FinanceManager_Server.Database.Repositories.TransactionRepository;
-import FinanceManager_Server.Database.Repositories.UserRepository;
 import FinanceManager_Server.Services.AuthService;
 import FinanceManager_Server.Services.EmailService;
 import FinanceManager_Server.TransportableDataObjects.TokenData;
@@ -25,6 +22,9 @@ public class AuthRestController {
     TransactionRepository transactionRepository;
     CategoryRepository categoryRepository;
     BudgetRepository budgetRepository;
+    TransactionActionRepository transactionActionRepository;
+    CategoryActionRepository categoryActionRepository;
+    BudgetActionRepository budgetActionRepository;
     AuthService authService;
     EmailService emailService;
 
@@ -39,13 +39,16 @@ public class AuthRestController {
     }
 
 
-    public AuthRestController(UserRepository userRepository, TransactionRepository transactionRepository, CategoryRepository categoryRepository, BudgetRepository budgetRepository, EmailService emailService, AuthService authService) {
+    public AuthRestController(UserRepository userRepository, TransactionRepository transactionRepository, CategoryRepository categoryRepository, BudgetRepository budgetRepository, TransactionActionRepository transactionActionRepository, CategoryActionRepository categoryActionRepository, BudgetActionRepository budgetActionRepository, AuthService authService, EmailService emailService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.budgetRepository = budgetRepository;
-        this.emailService = emailService;
+        this.transactionActionRepository = transactionActionRepository;
+        this.categoryActionRepository = categoryActionRepository;
+        this.budgetActionRepository = budgetActionRepository;
         this.authService = authService;
+        this.emailService = emailService;
     }
 
     public static HttpStatus mapResponseCode(ServerResponseCode code){
@@ -74,7 +77,7 @@ public class AuthRestController {
         if(user == null){
             user = new User(email, password, lang, Boolean.FALSE, "", "");
             System.out.println("Saving " + user);
-            userRepository.saveAndFlush(user);
+            user = userRepository.saveAndFlush(user);
             create_base_categories(user.getEmail());
         }else if (user.getVerified() == Boolean.TRUE){
             return new ResponseEntity<>("ALREADY_REGISTERED", mapResponseCode(ServerResponseCode.ALREADY_REGISTERED));
@@ -158,6 +161,12 @@ public class AuthRestController {
     @ResponseBody
     public String clear(){
         userRepository.deleteAll();
+        transactionRepository.deleteAll();
+        budgetRepository.deleteAll();
+        categoryRepository.deleteAll();
+        transactionActionRepository.deleteAll();
+        categoryActionRepository.deleteAll();
+        budgetActionRepository.deleteAll();
         return "DELETED";
     }
 

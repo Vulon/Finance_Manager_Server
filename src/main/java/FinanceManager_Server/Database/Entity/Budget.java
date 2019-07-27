@@ -40,9 +40,6 @@ public class Budget implements Serializable, Action {
     @Column(name = "end")
     private Date end;
 
-
-
-
     @Column(name = "notifyLevel")
     private Float notifyLevel;
 
@@ -61,25 +58,11 @@ public class Budget implements Serializable, Action {
     @Column(name = "commit_date")
     private Date commitDate;
 
-
-
     public Budget() {
     }
 
-
-    public Budget(Long user_id, String name, Double amount, Date start, Date end, Float notifyLevel, Date commitDate, Set<Category> categories) {
-        this.user = user_id;
-        this.name = name;
-        this.amount = amount;
-        this.start = start;
-        this.end = end;
-        this.notifyLevel = notifyLevel;
-        this.commitDate = commitDate;
-        this.categories = categories;
-    }
-
     public Budget(BudgetAction action){
-        this.budget = action.getBudget();
+        this.budget = action.getOriginalId();
         this.user = action.getUser();
         this.name = action.getName();
         this.amount = action.getAmount();
@@ -90,6 +73,10 @@ public class Budget implements Serializable, Action {
         this.categories = action.getCategories();
     }
 
+    @Override
+    public Long getOriginalId() {
+        return budget;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -105,6 +92,21 @@ public class Budget implements Serializable, Action {
                 Objects.equals(notifyLevel, budget.notifyLevel) &&
                 Objects.equals(commitDate, budget.commitDate) &&
                 Objects.equals(categories, budget.categories);
+    }
+
+    @Override
+    public String toString() {
+        return "Budget{" +
+                "budget=" + budget +
+                ", user=" + user +
+                ", name='" + name + '\'' +
+                ", amount=" + amount +
+                ", start=" + start +
+                ", end=" + end +
+                ", notifyLevel=" + notifyLevel +
+                ", categories=" + categories +
+                ", commitDate=" + commitDate +
+                '}';
     }
 
     @Override

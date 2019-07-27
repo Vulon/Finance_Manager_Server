@@ -50,7 +50,7 @@ public class Category  implements Serializable, Action {
         this.commitDate = commitDate;
     }
     public Category(CategoryAction action, Category parent){
-        this.category = action.getCategory();
+        this.category = action.getOriginalId();
         this.user = action.getUser();
         this.color = action.getColor();
         this.name = action.getName();
@@ -84,6 +84,11 @@ public class Category  implements Serializable, Action {
                 ", parent=" + parent +
                 ", commitDate=" + commitDate +
                 '}';
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return category;
     }
 
     @Override

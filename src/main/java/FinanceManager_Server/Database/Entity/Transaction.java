@@ -41,18 +41,9 @@ public class Transaction implements Serializable, Action {
     @Column(name = "commit_date")
     private Date commitDate;
 
-    public Transaction(Long user_id, Double amount, Date date, String note, Category category, Date commitDate) {
-        this.user = user_id;
-        this.amount = amount;
-        this.date = date;
-        this.note = note;
-        this.category = category;
-        this.commitDate = commitDate;
-    }
-
     public Transaction(TransactionAction action, Category category){
         this.user = action.getUser();
-        this.transaction = action.getTransaction();
+        this.transaction = action.getOriginalId();
         this.amount = action.getAmount();
         this.date = action.getDate();
         this.note = action.getNote();
@@ -75,6 +66,24 @@ public class Transaction implements Serializable, Action {
                 Objects.equals(note, that.note) &&
                 Objects.equals(category, that.category) &&
                 Objects.equals(commitDate, that.commitDate);
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return transaction;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "transaction=" + transaction +
+                ", user=" + user +
+                ", amount=" + amount +
+                ", date=" + date +
+                ", note='" + note + '\'' +
+                ", category=" + category +
+                ", commitDate=" + commitDate +
+                '}';
     }
 
     @Override

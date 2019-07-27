@@ -45,6 +45,8 @@ public class TransactionAction implements Serializable, Action {
     @Column(name = "category")
     private Long category_id;
 
+    private Long originalId;
+
     public static ArrayList<TransactionAction> toTransactionAction(Collection<Transaction> c){
         if (c == null){
             return new ArrayList<>();
@@ -56,15 +58,6 @@ public class TransactionAction implements Serializable, Action {
         return arrayList;
     }
 
-    public TransactionAction(boolean isCreate, Date commitDate, Long user_id, Double amount, Date date, String note, Long category_id) {
-        this.create = isCreate;
-        this.commitDate = commitDate;
-        this.user = user_id;
-        this.amount = amount;
-        this.date = date;
-        this.note = note;
-        this.category_id = category_id;
-    }
 
     public TransactionAction(boolean isCreate, Transaction transaction) {
         this.create = isCreate;
@@ -75,9 +68,15 @@ public class TransactionAction implements Serializable, Action {
         this.date = transaction.getDate();
         this.note = transaction.getNote();
         this.category_id = transaction.getCategory().getCategory();
+        this.originalId = transaction.getOriginalId();
     }
 
     public TransactionAction() {
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return originalId;
     }
 
     @Override
@@ -93,6 +92,21 @@ public class TransactionAction implements Serializable, Action {
                 Objects.equals(date, that.date) &&
                 Objects.equals(note, that.note) &&
                 Objects.equals(category_id, that.category_id);
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionAction{" +
+                "create=" + create +
+                ", commitDate=" + commitDate +
+                ", transaction=" + transaction +
+                ", user=" + user +
+                ", amount=" + amount +
+                ", date=" + date +
+                ", note='" + note + '\'' +
+                ", category_id=" + category_id +
+                ", originalId=" + originalId +
+                '}';
     }
 
     @Override
@@ -127,6 +141,7 @@ public class TransactionAction implements Serializable, Action {
 
     public void setTransaction(Long transaction) {
         this.transaction = transaction;
+        originalId = transaction;
     }
 
     public Long getUser() {
