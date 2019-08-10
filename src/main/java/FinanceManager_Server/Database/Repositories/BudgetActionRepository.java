@@ -15,7 +15,7 @@ import java.util.List;
 public interface BudgetActionRepository extends JpaRepository<BudgetAction, BudgetPK> {
 
     @Query
-    public List<BudgetAction> getAllByCommitDateAfter(Date date);
+    public List<BudgetAction> getAllByUserAndCommitDateAfter(Long user, Date date);
 
 
     @Query

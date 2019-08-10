@@ -20,7 +20,6 @@ public class Budget implements Serializable, Action {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long budget;
 
-
     @Id
     @Column(name = "user")
     private Long user;
@@ -41,18 +40,15 @@ public class Budget implements Serializable, Action {
     private Date end;
 
     @Column(name = "notifyLevel")
-    private Float notifyLevel;
+    private Double notifyLevel;
 
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "budget_category", joinColumns = {
-            @JoinColumn(name = "budget", referencedColumnName = "budget"),
-            @JoinColumn(name = "budget_user", referencedColumnName = "user")
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "category", referencedColumnName = "category"),
-            @JoinColumn(name = "category_user", referencedColumnName = "user")
-    })
-    private Set<Category> categories = new HashSet<>();
+
+    @OneToOne
+    private Category category;
+
+    @Column(name = "repeatable")
+    private boolean repeatable;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "commit_date")
@@ -61,7 +57,7 @@ public class Budget implements Serializable, Action {
     public Budget() {
     }
 
-    public Budget(BudgetAction action){
+    public Budget(BudgetAction action, Category category){
         this.budget = action.getOriginalId();
         this.user = action.getUser();
         this.name = action.getName();
@@ -70,29 +66,19 @@ public class Budget implements Serializable, Action {
         this.end = action.getEnd();
         this.notifyLevel = action.getNotifyLevel();
         this.commitDate = action.getCommitDate();
-        this.categories = action.getCategories();
+        this.category = category;
+        this.repeatable = action.isRepeatable();
     }
 
     @Override
     public Long getOriginalId() {
         return budget;
     }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Budget budget = (Budget) o;
-        return Objects.equals(this.budget, budget.budget) &&
-                Objects.equals(user, budget.user) &&
-                Objects.equals(name, budget.name) &&
-                Objects.equals(amount, budget.amount) &&
-                Objects.equals(start, budget.start) &&
-                Objects.equals(end, budget.end) &&
-                Objects.equals(notifyLevel, budget.notifyLevel) &&
-                Objects.equals(commitDate, budget.commitDate) &&
-                Objects.equals(categories, budget.categories);
+    public String getType() {
+        return "budget";
     }
+
 
     @Override
     public String toString() {
@@ -104,19 +90,32 @@ public class Budget implements Serializable, Action {
                 ", start=" + start +
                 ", end=" + end +
                 ", notifyLevel=" + notifyLevel +
-                ", categories=" + categories +
+                ", category=" + category +
+                ", repeatable=" + repeatable +
                 ", commitDate=" + commitDate +
                 '}';
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(budget, user, name, amount, start, end, notifyLevel, commitDate, categories);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Budget budget1 = (Budget) o;
+        return repeatable == budget1.repeatable &&
+                Objects.equals(budget, budget1.budget) &&
+                Objects.equals(user, budget1.user) &&
+                Objects.equals(name, budget1.name) &&
+                Objects.equals(amount, budget1.amount) &&
+                Objects.equals(start, budget1.start) &&
+                Objects.equals(end, budget1.end) &&
+                Objects.equals(notifyLevel, budget1.notifyLevel) &&
+                Objects.equals(category, budget1.category) &&
+                Objects.equals(commitDate, budget1.commitDate);
     }
 
     @Override
-    public String getType() {
-        return "budget";
+    public int hashCode() {
+        return Objects.hash(budget, user, name, amount, start, end, notifyLevel, category, repeatable, commitDate);
     }
 
     @Override
@@ -126,13 +125,7 @@ public class Budget implements Serializable, Action {
 
     @Override
     public void setCreate(boolean create) {
-    }
 
-    public void addCategory(Category c){
-        if(categories == null){
-            categories = new HashSet<>();
-        }
-        this.categories.add(c);
     }
 
     public Long getBudget() {
@@ -149,14 +142,6 @@ public class Budget implements Serializable, Action {
 
     public void setUser(Long user) {
         this.user = user;
-    }
-
-    public Set<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(Set<Category> categories) {
-        this.categories = categories;
     }
 
     public String getName() {
@@ -191,18 +176,36 @@ public class Budget implements Serializable, Action {
         this.end = end;
     }
 
-    public Float getNotifyLevel() {
+    public Double getNotifyLevel() {
         return notifyLevel;
     }
 
-    public void setNotifyLevel(Float notifyLevel) {
+    public void setNotifyLevel(Double notifyLevel) {
         this.notifyLevel = notifyLevel;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public boolean isRepeatable() {
+        return repeatable;
+    }
+
+    public void setRepeatable(boolean repeatable) {
+        this.repeatable = repeatable;
+    }
+
+    @Override
     public Date getCommitDate() {
         return commitDate;
     }
 
+    @Override
     public void setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
     }

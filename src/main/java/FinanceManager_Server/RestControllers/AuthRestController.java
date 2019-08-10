@@ -172,16 +172,15 @@ public class AuthRestController {
 
     private void create_base_categories(String user_email){
         User user = userRepository.findByEmail(user_email);
-        Category income = new Category(user.getId(), "#1fed45", "Income", 1, null, Date.from(Instant.now()));
-        Category expense = new Category(user.getId(), "#4e7dea", "Expense", 0, null, Date.from(Instant.now()));
+        Category income = new Category(user.getId(), "#1fed45", "Income", 1, true, null, Date.from(Instant.now()));
+        Category expense = new Category(user.getId(), "#4e7dea", "Expense", 0,false, null, Date.from(Instant.now()));
         income.setCategory(1l);
         expense.setCategory(0l);
         System.out.println("CREATE_BASE_CATEGORIES ");
-        System.out.println("Created " + income);
-        System.out.println("Created " + expense);
-        categoryRepository.saveAndFlush(income);
-        categoryRepository.saveAndFlush(expense);
-        System.out.println("SAVED CATEGORIES TO REPOSITORY");
+        income = categoryRepository.saveAndFlush(income);
+        expense = categoryRepository.saveAndFlush(expense);
+        System.out.println("Trying to save " + income + " And" + expense);
+        System.out.println("Stored: " + categoryRepository.findAllByUser(user.getId()));
     }
 
 

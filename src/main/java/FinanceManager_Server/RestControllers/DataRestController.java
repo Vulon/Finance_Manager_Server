@@ -5,7 +5,6 @@ import FinanceManager_Server.Database.Entity.*;
 import FinanceManager_Server.Database.Repositories.*;
 import FinanceManager_Server.Services.AuthService;
 import FinanceManager_Server.TransportableDataObjects.ActionQueue;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,22 +52,24 @@ public class DataRestController {
         }
         System.out.println("GET UPDATES: update date is " + update_date.toString());
         ArrayList<CategoryAction> categoryActions = CategoryAction.toCategoryAction(categoryRepository.getAllByUserAndCommitDateAfter(user.getId() ,update_date));
-
+        System.out.println("Found saved categories: " + categoryRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date));
         {
-            ArrayList<CategoryAction> temp = (ArrayList<CategoryAction>)categoryActionRepository.getAllByCommitDateAfter(update_date);
+            ArrayList<CategoryAction> temp = (ArrayList<CategoryAction>)categoryActionRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date);
             if(temp != null)
                 categoryActions.addAll(temp);
         }
-        ArrayList<TransactionAction> transactionActions = TransactionAction.toTransactionAction(transactionRepository.getAllByCommitDateAfter(update_date));
+        ArrayList<TransactionAction> transactionActions = TransactionAction.toTransactionAction(transactionRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date));
+        System.out.println("Found saved transactions: " + transactionRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date));
         {
-            ArrayList<TransactionAction> temp = (ArrayList<TransactionAction>)transactionActionRepository.getAllByCommitDateAfter(update_date);
+            ArrayList<TransactionAction> temp = (ArrayList<TransactionAction>)transactionActionRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date);
             if(temp != null){
                 transactionActions.addAll(temp);
             }
         }
-        ArrayList<BudgetAction> budgetActions = BudgetAction.toBudgetAction(budgetRepository.getAllByCommitDateAfter(update_date));
+        ArrayList<BudgetAction> budgetActions = BudgetAction.toBudgetAction(budgetRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date));
+        System.out.println("Found saved budgets: " + budgetRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date));
         {
-            ArrayList<BudgetAction> temp = (ArrayList<BudgetAction>)budgetActionRepository.getAllByCommitDateAfter(update_date);
+            ArrayList<BudgetAction> temp = (ArrayList<BudgetAction>)budgetActionRepository.getAllByUserAndCommitDateAfter(user.getId(), update_date);
             if(temp != null){
                 budgetActions.addAll(temp);
             }
@@ -151,16 +152,11 @@ public class DataRestController {
                     BudgetAction budgetAction = (BudgetAction) action;
                     try{
                         if(budgetAction.isCreate()){
-//
-                            Set<Category> categoriesOld = budgetAction.getCategories();
-                            Budget budget = new Budget(budgetAction);
-                            budget.setCategories(new HashSet<>());
-                            for(Category c : categoriesOld){
-                                budget.addCategory(categoryRepository.getByUserAndCategory(user_id, c.getCategory()));
-                            }
+                            Category category = categoryRepository.getByUserAndCategory(user_id, budgetAction.getCategory());
+                            Budget budget = new Budget(budgetAction, category);
+                            budget.setCategory(category);
                             budget = budgetRepository.saveAndFlush(budget);
                             budgetAction.setBudget(budget.getBudget());
-
                         }else{
                             budgetRepository.deleteByUserAndBudget(user_id, budgetAction.getOriginalId());
                             budgetRepository.flush();
@@ -169,7 +165,6 @@ public class DataRestController {
                                 budgetActionRepository.deleteOldest(user_id);
                                 budgetActionRepository.flush();
                             }
-                            budgetAction.setCategories(new HashSet<>());
 
                             budgetAction = budgetActionRepository.saveAndFlush(budgetAction);
                         }
@@ -190,20 +185,20 @@ public class DataRestController {
                     }else{
                         Category parent = categoryRepository.getByUserAndCategory(user_id, categoryAction.getParent_id());
                         Category thisCategory = categoryRepository.getByUserAndCategory(categoryAction.getUser(), categoryAction.getOriginalId());
-                        List<Budget> budgetList = budgetRepository.getAllByUserAndCategory(user_id, thisCategory);
+                        ArrayList<Budget> budgetList = budgetRepository.getAllByUser(user_id);
+
                         for(Budget b : budgetList){ //Clear category reference in budget tables
-                            try{
-                                Set<Category> temp = b.getCategories();
-                                temp.remove(thisCategory);
-                                temp.add(parent);
-                                b.setCategories(temp);
-                                budgetRepository.save(b);
-                            }catch (Exception e){
-                                e.printStackTrace();
+                            if(b.getCategory().getCategory().equals( thisCategory.getCategory())){
+                                try{
+                                    b.setCategory(parent);
+                                    budgetRepository.save(b);
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         budgetRepository.flush();
-                        List<Transaction> transactionList = transactionRepository.getAllByCategory(thisCategory);
+                        List<Transaction> transactionList = transactionRepository.getAllByUserAndCategory(user_id, thisCategory);
                         for(Transaction t : transactionList){ //Clear category reference in transaction table
                             try{
                                 t.setCategory(parent);

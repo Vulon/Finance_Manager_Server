@@ -47,6 +47,9 @@ public class TransactionAction implements Serializable, Action {
 
     private Long originalId;
 
+    @Column(name = "repeatable")
+    private boolean repeatable;
+
     public static ArrayList<TransactionAction> toTransactionAction(Collection<Transaction> c){
         if (c == null){
             return new ArrayList<>();
@@ -69,29 +72,10 @@ public class TransactionAction implements Serializable, Action {
         this.note = transaction.getNote();
         this.category_id = transaction.getCategory().getCategory();
         this.originalId = transaction.getOriginalId();
+        this.repeatable = transaction.isRepeatable();
     }
 
     public TransactionAction() {
-    }
-
-    @Override
-    public Long getOriginalId() {
-        return originalId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TransactionAction that = (TransactionAction) o;
-        return create == that.create &&
-                Objects.equals(commitDate, that.commitDate) &&
-                Objects.equals(transaction, that.transaction) &&
-                Objects.equals(user, that.user) &&
-                Objects.equals(amount, that.amount) &&
-                Objects.equals(date, that.date) &&
-                Objects.equals(note, that.note) &&
-                Objects.equals(category_id, that.category_id);
     }
 
     @Override
@@ -106,42 +90,68 @@ public class TransactionAction implements Serializable, Action {
                 ", note='" + note + '\'' +
                 ", category_id=" + category_id +
                 ", originalId=" + originalId +
+                ", repeatable=" + repeatable +
                 '}';
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(create, commitDate, transaction, user, amount, date, note, category_id);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransactionAction that = (TransactionAction) o;
+        return create == that.create &&
+                repeatable == that.repeatable &&
+                Objects.equals(commitDate, that.commitDate) &&
+                Objects.equals(transaction, that.transaction) &&
+                Objects.equals(user, that.user) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(date, that.date) &&
+                Objects.equals(note, that.note) &&
+                Objects.equals(category_id, that.category_id) &&
+                Objects.equals(originalId, that.originalId);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(create, commitDate, transaction, user, amount, date, note, category_id, originalId, repeatable);
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return originalId;
+    }
     @Override
     public String getType() {
         return "transaction";
     }
 
+    public void setTransaction(Long transaction) {
+        this.transaction = transaction;
+        originalId = transaction;
+    }
+
+    @Override
     public boolean isCreate() {
         return create;
     }
 
+    @Override
     public void setCreate(boolean create) {
         this.create = create;
     }
 
+    @Override
     public Date getCommitDate() {
         return commitDate;
     }
 
+    @Override
     public void setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
     }
 
     public Long getTransaction() {
         return transaction;
-    }
-
-    public void setTransaction(Long transaction) {
-        this.transaction = transaction;
-        originalId = transaction;
     }
 
     public Long getUser() {
@@ -182,5 +192,17 @@ public class TransactionAction implements Serializable, Action {
 
     public void setCategory_id(Long category_id) {
         this.category_id = category_id;
+    }
+
+    public void setOriginalId(Long originalId) {
+        this.originalId = originalId;
+    }
+
+    public boolean isRepeatable() {
+        return repeatable;
+    }
+
+    public void setRepeatable(boolean repeatable) {
+        this.repeatable = repeatable;
     }
 }

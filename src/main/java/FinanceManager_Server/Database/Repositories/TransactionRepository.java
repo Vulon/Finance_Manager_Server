@@ -13,14 +13,14 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     @Query
-    List<Transaction> getAllByCommitDateAfter(Date date);
+    List<Transaction> getAllByUserAndCommitDateAfter(Long user, Date date);
 
     @Modifying
     @Transactional
     void deleteByUserAndTransaction(Long user, Long transaction);
 
     @Query
-    List<Transaction> getAllByCategory(Category category);
+    List<Transaction> getAllByUserAndCategory(Long user, Category category);
 
     @Query
     Transaction getByUserAndTransaction(Long user, Long transaction);

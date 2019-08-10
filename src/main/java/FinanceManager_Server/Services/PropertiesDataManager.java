@@ -19,7 +19,7 @@ public class PropertiesDataManager implements Serializable {
     }
 
     public void loadData(){
-        saveData();
+        //saveData();
         InputStream inputStream = null;
         try{
             ClassLoader classLoader = Application.class.getClassLoader();
@@ -32,23 +32,8 @@ public class PropertiesDataManager implements Serializable {
             e.printStackTrace();
         }
     }
-    public void saveData(){// TODO DELETE THIS LATER
-        //byte[] secretKey = TextCodec.BASE64.decode("T8G4Fd5DbDs4gLgE5og12GQ4C3Mn4S");
-        String secretKey = "T8G4Fd5DbDs4gLgE5og12GQ4C3Mn4S";
-        System.out.println("Saving: " + secretKey);
-        secretData = new SecretData("nightspy2012@gmail.com", "ataefmrncsomfxpl",secretKey);
-        try {
-            ClassLoader classLoader = Application.class.getClassLoader();
-            File file = new File(classLoader.getResource("data.properties").getFile());
-            FileOutputStream outputStream = new FileOutputStream(file);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(secretData);
-            outputStream.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
-    }
+
 
     public byte[] getEncodedSecretKey(){
         return TextCodec.BASE64.decode(getSecretKey());

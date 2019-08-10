@@ -31,6 +31,9 @@ public class Category  implements Serializable, Action {
     @Column(name = "icon_id")
     private Integer icon_id;
 
+    @Column(name = "income")
+    private boolean income;
+
     @OneToOne
     private Category parent;
 
@@ -41,14 +44,16 @@ public class Category  implements Serializable, Action {
     public Category() {
     }
 
-    public Category(Long user_id, String color, String name, Integer icon_id, Category parent, Date commitDate) {
-        this.user = user_id;
+    public Category(Long user, String color, String name, Integer icon_id, boolean income, Category parent, Date commitDate) {
+        this.user = user;
         this.color = color;
         this.name = name;
         this.icon_id = icon_id;
+        this.income = income;
         this.parent = parent;
         this.commitDate = commitDate;
     }
+
     public Category(CategoryAction action, Category parent){
         this.category = action.getOriginalId();
         this.user = action.getUser();
@@ -57,20 +62,28 @@ public class Category  implements Serializable, Action {
         this.icon_id = action.getIcon_id();
         this.parent = parent;
         this.commitDate = action.getCommitDate();
+        this.income = action.isIncome();
     }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return Objects.equals(this.category, category.category) &&
-                Objects.equals(user, category.user) &&
-                Objects.equals(color, category.color) &&
-                Objects.equals(name, category.name) &&
-                Objects.equals(icon_id, category.icon_id) &&
-                Objects.equals(parent, category.parent) &&
-                Objects.equals(commitDate, category.commitDate);
+        Category category1 = (Category) o;
+        return income == category1.income &&
+                category.equals(category1.category) &&
+                user.equals(category1.user) &&
+                color.equals(category1.color) &&
+                name.equals(category1.name) &&
+                icon_id.equals(category1.icon_id) &&
+                Objects.equals(parent, category1.parent) &&
+                commitDate.equals(category1.commitDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(category, user, color, name, icon_id, income, parent, commitDate);
     }
 
     @Override
@@ -81,6 +94,7 @@ public class Category  implements Serializable, Action {
                 ", color='" + color + '\'' +
                 ", name='" + name + '\'' +
                 ", icon_id=" + icon_id +
+                ", income=" + income +
                 ", parent=" + parent +
                 ", commitDate=" + commitDate +
                 '}';
@@ -89,11 +103,6 @@ public class Category  implements Serializable, Action {
     @Override
     public Long getOriginalId() {
         return category;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(category, user, color, name, icon_id, parent, commitDate);
     }
 
     @Override
@@ -164,6 +173,14 @@ public class Category  implements Serializable, Action {
 
     public void setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
+    }
+
+    public boolean isIncome() {
+        return income;
+    }
+
+    public void setIncome(boolean income) {
+        this.income = income;
     }
 }
 

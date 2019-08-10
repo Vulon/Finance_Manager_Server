@@ -8,20 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
     @Query
-    List<Budget> getAllByCommitDateAfter(Date date);
+    List<Budget> getAllByUserAndCommitDateAfter(Long user, Date date);
 
     @Query
     @Modifying
     @Transactional
     void deleteByUserAndBudget(Long user, Long budget);
 
-    @Query(value = "SELECT b FROM Budget b WHERE b.user = :user AND :category IN (b.categories)") //TODO CHECK THAT
-    List<Budget> getAllByUserAndCategory(@Param(value = "user")Long user, @Param(value = "category") Category category);
+
+    @Query
+    ArrayList<Budget> getAllByUser(Long user);
 
     @Query
     Budget findByUserAndBudget(Long user, Long budget);

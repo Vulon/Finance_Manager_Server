@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CategoryActionRepository extends JpaRepository<CategoryAction, CategoryPK> {
     @Query
-    public List<CategoryAction> getAllByCommitDateAfter(Date date);
+    public List<CategoryAction> getAllByUserAndCommitDateAfter(Long user, Date date);
 
     @Query
     int countByUserAndCategory(Long user, Long category);

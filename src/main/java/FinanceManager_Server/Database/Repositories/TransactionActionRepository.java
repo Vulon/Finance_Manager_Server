@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface TransactionActionRepository extends JpaRepository<TransactionAction, TransactionPK> {
     @Query
-    List<TransactionAction> getAllByCommitDateAfter(Date date);
+    List<TransactionAction> getAllByUserAndCommitDateAfter(Long user, Date date);
 
     @Query
     int countByUserAndTransaction(Long user_id, Long transaction_id);

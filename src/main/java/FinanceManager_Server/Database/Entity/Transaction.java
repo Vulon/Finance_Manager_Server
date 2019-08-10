@@ -37,6 +37,9 @@ public class Transaction implements Serializable, Action {
     @OneToOne
     private Category category;
 
+    @Column(name = "repeatable")
+    private boolean repeatable;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "commit_date")
     private Date commitDate;
@@ -49,28 +52,10 @@ public class Transaction implements Serializable, Action {
         this.note = action.getNote();
         this.category = category;
         this.commitDate = action.getCommitDate();
+        this.repeatable = action.isRepeatable();
     }
 
     public Transaction() {
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Transaction that = (Transaction) o;
-        return Objects.equals(transaction, that.transaction) &&
-                Objects.equals(user, that.user) &&
-                Objects.equals(amount, that.amount) &&
-                Objects.equals(date, that.date) &&
-                Objects.equals(note, that.note) &&
-                Objects.equals(category, that.category) &&
-                Objects.equals(commitDate, that.commitDate);
-    }
-
-    @Override
-    public Long getOriginalId() {
-        return transaction;
     }
 
     @Override
@@ -82,19 +67,41 @@ public class Transaction implements Serializable, Action {
                 ", date=" + date +
                 ", note='" + note + '\'' +
                 ", category=" + category +
+                ", repeatable=" + repeatable +
                 ", commitDate=" + commitDate +
                 '}';
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return repeatable == that.repeatable &&
+                Objects.equals(transaction, that.transaction) &&
+                Objects.equals(user, that.user) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(date, that.date) &&
+                Objects.equals(note, that.note) &&
+                Objects.equals(category, that.category) &&
+                Objects.equals(commitDate, that.commitDate);
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(transaction, user, amount, date, note, category, commitDate);
+        return Objects.hash(transaction, user, amount, date, note, category, repeatable, commitDate);
+    }
+
+    @Override
+    public Long getOriginalId() {
+        return transaction;
     }
 
     @Override
     public String getType() {
         return "transaction";
     }
+
 
     @Override
     public boolean isCreate() {
@@ -130,14 +137,6 @@ public class Transaction implements Serializable, Action {
         this.amount = amount;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
     public Date getDate() {
         return date;
     }
@@ -154,10 +153,28 @@ public class Transaction implements Serializable, Action {
         this.note = note;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public boolean isRepeatable() {
+        return repeatable;
+    }
+
+    public void setRepeatable(boolean repeatable) {
+        this.repeatable = repeatable;
+    }
+
+    @Override
     public Date getCommitDate() {
         return commitDate;
     }
 
+    @Override
     public void setCommitDate(Date commitDate) {
         this.commitDate = commitDate;
     }
