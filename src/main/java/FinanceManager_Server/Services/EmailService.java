@@ -37,7 +37,6 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-
     public String sendVerification(String email, String access_token){
         sendMessage(email, "Registration in Finance Manager App", "Your email was registered in Finance Manager App\n" +
                 "If it was not you, please, do not follow this link, your data will be deleted from server in 30 mins" +

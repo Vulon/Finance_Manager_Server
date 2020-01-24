@@ -3,6 +3,7 @@ package FinanceManager_Server.Services;
 import FinanceManager_Server.Application;
 import io.jsonwebtoken.impl.TextCodec;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -12,26 +13,15 @@ import java.io.*;
 public class PropertiesDataManager implements Serializable {
 
     private static final long serialVersionUID = 8571137094210487341L;
-    private SecretData secretData = null;
+
+    private Environment env;
+
     public static String SERVER_ADDRESS = "http://localhost:8081";
 
-    public PropertiesDataManager() {
+    public PropertiesDataManager(Environment env) {
+        this.env = env;
     }
 
-    public void loadData(){
-        //saveData();
-        InputStream inputStream = null;
-        try{
-            ClassLoader classLoader = Application.class.getClassLoader();
-            File file = new File(classLoader.getResource("data.properties").getFile());
-            inputStream = new FileInputStream(file);
-            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-            secretData = (SecretData)objectInputStream.readObject();
-            inputStream.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
 
 
@@ -40,51 +30,15 @@ public class PropertiesDataManager implements Serializable {
     }
 
     public String getEmailAddress(){
-        if (secretData == null){
-            loadData();
-        }
-        return secretData.getHostAddress();
+        return env.getProperty("email_host");
     }
 
     public   String getEmailApiPassword(){
-        if (secretData == null){
-            loadData();
-        }
-        return secretData.getHostApiPassword();
+        return env.getProperty("google_api_key");
     }
     public  String getSecretKey(){
-        if (secretData == null){
-            loadData();
-        }
-        return  secretData.getSecret_key();
+        return env.getProperty("secret_key");
     }
 
-    private   class SecretData implements Serializable {
-        private static final long serialVersionUID = -3895578810390383253L;
-        String hostAddress;
-        String hostApiPassword;
-        String secret_key;
 
-
-        public SecretData() {
-        }
-
-        public SecretData(String hostAddress, String hostApiPassword, String secret_key) {
-            this.hostAddress = hostAddress;
-            this.hostApiPassword = hostApiPassword;
-            this.secret_key = secret_key;
-        }
-
-        public String getHostAddress() {
-            return hostAddress;
-        }
-
-        public String getHostApiPassword() {
-            return hostApiPassword;
-        }
-
-        public String getSecret_key() {
-            return secret_key;
-        }
-    }
 }

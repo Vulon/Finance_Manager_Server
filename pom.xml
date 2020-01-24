@@ -7,6 +7,7 @@
     <groupId>Amir</groupId>
     <artifactId>Finance_Manager_Server</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     
     <parent>

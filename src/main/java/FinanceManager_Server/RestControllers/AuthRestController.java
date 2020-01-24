@@ -88,7 +88,6 @@ public class AuthRestController {
         userRepository.updateTokens(user.getId(), access_token, refresh_token);
         String url = emailService.sendVerification(email, access_token);
         return new ResponseEntity<>(url, mapResponseCode(ServerResponseCode.OK));
-        //FOR DEBUG purpose send back access token
     }
 
     @RequestMapping(value = "/verify", method = RequestMethod.GET)

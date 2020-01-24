@@ -22,6 +22,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query
     List<Transaction> getAllByUserAndCategory(Long user, Category category);
 
+
+
     @Query
     Transaction getByUserAndTransaction(Long user, Long transaction);
 
